@@ -6,9 +6,14 @@ ROOT_URL = 'https://sre.google'
 TOC_URL  = '/sre-book/table-of-contents/'
 
 
+def url_to_path(root_url = ROOT_URL):
+    domain = root_url.split('//')[1]
+    subdir = domain.replace('.', '_')
+    return subdir
+
 def download_links(root_url = ROOT_URL, \
                 toc_url = TOC_URL, \
-                file_name=None):
+                filename=None):
 
 
     req = re.get(root_url+toc_url)
@@ -21,64 +26,55 @@ def download_links(root_url = ROOT_URL, \
             branches.append(root_url+branch)
 
     # make subdirectory
-    subdir = url_to_path(root_url, toc_url)
+    subdir = url_to_path(root_url)
     try:
         os.mkdir(subdir)
     except: 
         print(f'Subdirectory {subdir} already exists')
+        return None
 
-    # configure file_name automatically
-    if not file_name:
-        file_name = subdir+'/links.txt'
+    # configure filename automatically
+    if not filename:
+        filename = subdir+'/links.txt'
 
-    with open(file_name, 'w+') as f:
+    with open(filename, 'w+') as f:
         for branch in branches:
-            f.write(branch+'\n')
+            f.write(branch+',')
 
-
-###
-### STORE LINKS AS CSV
-### Problems with new line in download pages causing http errors!
-####
-def download_pages(link_path='sre_google/links.txt'):  # generalize later
-    with open(link_path, 'r') as f:
-        links = f.readlines()
+def download_pages(dir_path='sre_google/', filename='links.txt'):  # generalize later
+    with open(dir_path+filename, 'r') as f:
+        lines = f.readline()
     
-    c = 0
-    N = 3
-    for link in links:
-        scrape_to_file(link)
-        c += 1
-        if c>N:
-            break 
+    # currently seperated by commas
+    links = lines.split(',')
+    
+    for link in links[:-2]:   # skips last empty line and bibliography
+        branch = link.split('/')[-2]
+        print('\n\n', branch) 
+        text = get_page_as_text(link)
+        append_text_to_file(text, dir_path+branch+'.txt') 
     return None 
-    
         
-def scrape_to_file(url):
+def get_page_as_text(url, print_content=false):
     req = re.get(url)
     soup = BeautifulSoup(req.text, 'html.parser')
-    print(soup.find_all('p'))
+    bottom = soup.text.split('Bibliography')[1]
+    page = bottom.split('Previous')[0]
+    content = page.replace('\n\n\n\n', '')
+    content = content.replace('â', ' ')
+    if print_content:
+        print(content)
+    return content
 
+def append_text_to_file(text='', filename=''):
+    with open(filename, 'a+') as f:
+        f.write(text)
+    return text
 
 if __name__=='__main__':
+    # download links of chapters
     # download_links()
 
     # download content from pages to files
     download_pages()
 
-
-
-
-
-    # def read_links(root_url = ROOT_URL, \
-    #                 toc_url = TOC_URL):
-    #     return None
-
-    # def get_links(link_path=):
-    #     return None
-
-    # def url_to_path(root_url = ROOT_URL, \
-    #                 path_url = PATH_URL):
-    #     domain = root_url.split('//')[1]
-    #     subdir = domain.replace('.', '_')
-    #     return subdir
