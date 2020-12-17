@@ -14,15 +14,21 @@ def get_colored_chunks(text, markdown=False, color='green', norwegian=False):
     
     doc = nlp(text)
 
-    if markdown:
-        for chunk in doc.noun_chunks:
-            text = text.replace(chunk.text, f'<mark><span style="color:{color}">{chunk.text}</span></mark>')
-        return text 
-    else:
-        for chunk in doc.noun_chunks:
-            text = text.replace(chunk.text, colored(chunk.text, 'green'))
+    sentence_spans = list(doc.sents)
+
+    ### need to handle mutliple sentences
+    ### need to replace only current chunk
+    ### need to stay as general as possible
+
+    for chunk in doc.noun_chunks:
+        if markdown:
+            replacement = f'<mark><span style="color:{color}">{chunk.text}</span></mark>'
+        else:
+            replacement = colored(chunk.text, 'green')
             # text = text.replace(chunk.root.text, colored(chunk.root.text, 'yellow', 'on_green'))
-        return text
+        
+        text = text.replace(chunk.text, replacement)
+    return text
 
 
 if __name__=='__main__':

@@ -55,13 +55,13 @@ def download_pages(dir_path='sre_google/', filename='links.txt'):  # generalize 
         append_text_to_file(text, dir_path+branch+'.txt') 
     return None 
         
-def get_page_as_text(url, print_content=false):
+def get_page_as_text(url, print_content=False):
     req = re.get(url)
     soup = BeautifulSoup(req.text, 'html.parser')
     bottom = soup.text.split('Bibliography')[1]
     page = bottom.split('Previous')[0]
     content = page.replace('\n\n\n\n', '')
-    content = content.replace('â', ' ')
+    content = content.replace('â', '')
     if print_content:
         print(content)
     return content
