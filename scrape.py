@@ -1,4 +1,4 @@
-import requests as re
+import requests
 from bs4 import BeautifulSoup
 import os
 import re
@@ -18,7 +18,7 @@ def download_links(root_url = ROOT_URL, \
                 filename=None):
 
 
-    req = re.get(root_url+toc_url)
+    req = requests.get(root_url+toc_url)
     soup = BeautifulSoup(req.text, 'html.parser')
 
     branches = []
@@ -43,7 +43,7 @@ def download_links(root_url = ROOT_URL, \
         for branch in branches:
             f.write(branch+',')
 
-def download_pages(dir_path='sre_google/', filename='links.txt'):  # generalize later
+def download_pages(dir_path='sre_google/', filename='link.txt'):  # generalize later
     ## TO ACTIVATE ALL PAGES AGAIN; CHANGE filename='links.txt'
     
     with open(dir_path+filename, 'r') as f:
@@ -61,17 +61,29 @@ def download_pages(dir_path='sre_google/', filename='links.txt'):  # generalize 
         
 def get_page_as_text(url, print_page=False, bold_titles=True):
     # TODO: regex selection titles ('\n\n<some string>\n) to make bold ('\n\n**<string>**\n')
-    req = re.get(url)
-    req.encoding = 'utf-8'
-    soup = BeautifulSoup(req.content)           # to get rid of html code
+    req = requests.get(url)
+    req.encoding = 'utf-8'                      # TODO: might not be necessary?
+    soup = BeautifulSoup(req.content)           # to get rid of html tags
+
+    # small site specific alterations to text
     bottom = soup.text.split('Bibliography')[1] # get rid of nav bar links
     page = bottom.split('Previous')[0]          # get rid of footer
     page = page.replace('\n\n\n\n', '')         # cut unnecessary whitespaces
     page = page.replace("’", "'")               # replace erroneous apostrophe
+    
+    # get titles from soup 
+    print(soup.find_all('h1'))
+
+
     if print_page:
         print(page)
 
     if bold_titles:
+        regex = r"\n\n([^\.]+)\n"    # everytime '\n\n<string>\n occurs w/o a period . 
+        matches = re.findall(regex, page)
+        for m in matches:
+            m = m.strip('\n')
+            page = page.replace(m, f'# {m}') # replaces with markdown title
 
     return page
 
