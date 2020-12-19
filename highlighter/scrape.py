@@ -55,7 +55,7 @@ def download_pages(dir_path='sre_google/', filename='links.txt'):  # generalize 
     
     for link in links[:-2]:   # skips last empty line and bibliography
         branch = link.split('/')[-2]
-        print('Downling branch: ', branch) 
+        # print('Downling branch: ', branch) 
         text = get_page_as_text(link)
         write_text_to_file(text, dir_path+branch+'.txt') 
     return None 
