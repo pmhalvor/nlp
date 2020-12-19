@@ -7,27 +7,32 @@ str3 = " When Sebastian Thrun started working on self-driving cars at Google in 
 
 
 def get_colored_chunks(text, markdown=False, color='green', norwegian=False):
+    ###### EXPORT THIS TO STATE OF CLASS ######
     if norwegian: 
         nlp = spacy.load('nb_core_web_sm')
     else:
         nlp = spacy.load("en_core_web_sm")
+    ###########################################
     
     doc = nlp(text)
 
     sentence_spans = list(doc.sents)
 
-    ### need to handle mutliple sentences
-    ### need to replace only current chunk
-    ### need to stay as general as possible
+    for sentence in sentence_spans:
+        color_sentence = sentence.text
+        for chunk in sentence.noun_chunks:
+            ###### EXPORT THIS TO STATE OF CLASS ######
+            if markdown:
+                replacement = f'<mark><span style="color:{color}">{chunk.text}</span></mark>'
+            else:
+                replacement = colored(chunk.text, color, 'on_yellow')
+            ###########################################
 
-    for chunk in doc.noun_chunks:
-        if markdown:
-            replacement = f'<mark><span style="color:{color}">{chunk.text}</span></mark>'
-        else:
-            replacement = colored(chunk.text, 'green')
-            # text = text.replace(chunk.root.text, colored(chunk.root.text, 'yellow', 'on_green'))
-        
-        text = text.replace(chunk.text, replacement)
+            
+            color_sentence = color_sentence.replace(chunk.text, replacement)
+            # still doesnt check mulitple instances of chunk in sentence
+            # implement this error as a text later
+        text = text.replace(sentence.text, color_sentence)
     return text
 
 

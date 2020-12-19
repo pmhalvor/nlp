@@ -1,6 +1,8 @@
 import requests as re
 from bs4 import BeautifulSoup
 import os
+import re
+
 
 ROOT_URL = 'https://sre.google'
 TOC_URL  = '/sre-book/table-of-contents/'
@@ -42,6 +44,8 @@ def download_links(root_url = ROOT_URL, \
             f.write(branch+',')
 
 def download_pages(dir_path='sre_google/', filename='links.txt'):  # generalize later
+    ## TO ACTIVATE ALL PAGES AGAIN; CHANGE filename='links.txt'
+    
     with open(dir_path+filename, 'r') as f:
         lines = f.readline()
     
@@ -52,22 +56,27 @@ def download_pages(dir_path='sre_google/', filename='links.txt'):  # generalize 
         branch = link.split('/')[-2]
         print('\n\n', branch) 
         text = get_page_as_text(link)
-        append_text_to_file(text, dir_path+branch+'.txt') 
+        write_text_to_file(text, dir_path+branch+'.txt') 
     return None 
         
-def get_page_as_text(url, print_content=False):
+def get_page_as_text(url, print_page=False, bold_titles=True):
+    # TODO: regex selection titles ('\n\n<some string>\n) to make bold ('\n\n**<string>**\n')
     req = re.get(url)
-    soup = BeautifulSoup(req.text, 'html.parser')
-    bottom = soup.text.split('Bibliography')[1]
-    page = bottom.split('Previous')[0]
-    content = page.replace('\n\n\n\n', '')
-    content = content.replace('â', '')
-    if print_content:
-        print(content)
-    return content
+    req.encoding = 'utf-8'
+    soup = BeautifulSoup(req.content)           # to get rid of html code
+    bottom = soup.text.split('Bibliography')[1] # get rid of nav bar links
+    page = bottom.split('Previous')[0]          # get rid of footer
+    page = page.replace('\n\n\n\n', '')         # cut unnecessary whitespaces
+    page = page.replace("’", "'")               # replace erroneous apostrophe
+    if print_page:
+        print(page)
 
-def append_text_to_file(text='', filename=''):
-    with open(filename, 'a+') as f:
+    if bold_titles:
+
+    return page
+
+def write_text_to_file(text='', filename=''):
+    with open(filename, 'w+') as f:
         f.write(text)
     return text
 
