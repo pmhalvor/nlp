@@ -1,0 +1,5 @@
+termcolor
+bs4
+lxml
+spacy
+en_core_web_sm
