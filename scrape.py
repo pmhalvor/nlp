@@ -43,7 +43,7 @@ def download_links(root_url = ROOT_URL, \
         for branch in branches:
             f.write(branch+',')
 
-def download_pages(dir_path='sre_google/', filename='link.txt'):  # generalize later
+def download_pages(dir_path='sre_google/', filename='links.txt'):  # generalize later
     ## TO ACTIVATE ALL PAGES AGAIN; CHANGE filename='links.txt'
     
     with open(dir_path+filename, 'r') as f:
@@ -54,7 +54,7 @@ def download_pages(dir_path='sre_google/', filename='link.txt'):  # generalize l
     
     for link in links[:-2]:   # skips last empty line and bibliography
         branch = link.split('/')[-2]
-        print('\n\n', branch) 
+        print('Downling branch: ', branch) 
         text = get_page_as_text(link)
         write_text_to_file(text, dir_path+branch+'.txt') 
     return None 
@@ -62,29 +62,23 @@ def download_pages(dir_path='sre_google/', filename='link.txt'):  # generalize l
 def get_page_as_text(url, print_page=False, bold_titles=True):
     # TODO: regex selection titles ('\n\n<some string>\n) to make bold ('\n\n**<string>**\n')
     req = requests.get(url)
-    req.encoding = 'utf-8'                      # TODO: might not be necessary?
-    soup = BeautifulSoup(req.content)           # to get rid of html tags
+    # req.encoding = 'utf-8'                      # TODO: might not be necessary?
+    soup = BeautifulSoup(req.content, 'lxml')           # to get rid of html tags
 
     # small site specific alterations to text
     bottom = soup.text.split('Bibliography')[1] # get rid of nav bar links
     page = bottom.split('Previous')[0]          # get rid of footer
     page = page.replace('\n\n\n\n', '')         # cut unnecessary whitespaces
-    page = page.replace("’", "'")               # replace erroneous apostrophe
     
-    # get titles from soup 
-    print(soup.find_all('h1'))
-
 
     if print_page:
         print(page)
 
     if bold_titles:
-        regex = r"\n\n([^\.]+)\n"    # everytime '\n\n<string>\n occurs w/o a period . 
-        matches = re.findall(regex, page)
-        for m in matches:
-            m = m.strip('\n')
-            page = page.replace(m, f'# {m}') # replaces with markdown title
-
+        for h1 in soup.find_all('h1'):
+            page = page.replace(f'\n\n{h1.text}', f'\n\n# {h1.text}\n') 
+        for h2 in soup.find_all('h2'):
+            page = page.replace(f'\n\n{h2.text}', f'\n\n## {h2.text}\n') 
     return page
 
 def write_text_to_file(text='', filename=''):

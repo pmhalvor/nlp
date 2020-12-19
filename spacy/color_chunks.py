@@ -23,12 +23,22 @@ def get_colored_chunks(text, markdown=False, color='green', norwegian=False):
         for chunk in sentence.noun_chunks:
             ###### EXPORT THIS TO STATE OF CLASS ######
             if markdown:
-                replacement = f'<mark><span style="color:{color}">{chunk.text}</span></mark>'
+                # make sure no # get caught in mark
+                pre = ''
+                chunk_text = chunk.text  
+                if '##' in chunk.text:
+                    pre = '## '
+                    chunk_text = chunk_text.strip('## ')
+                elif '#' in chunk_text:
+                    pre = '# '
+                    chunk_text = chunk_text.strip(('# '))
+                
+                replacement = pre+f'<mark><span style="color:{color}">{chunk_text}</span></mark>'
             else:
-                replacement = colored(chunk.text, color, 'on_yellow')
+                replacement = pre+colored(chunk_text, color, 'on_yellow')
             ###########################################
 
-            
+
             color_sentence = color_sentence.replace(chunk.text, replacement)
             # still doesnt check mulitple instances of chunk in sentence
             # implement this error as a text later
