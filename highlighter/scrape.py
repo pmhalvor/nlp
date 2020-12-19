@@ -89,7 +89,7 @@ def write_text_to_file(text='', filename=''):
 
 if __name__=='__main__':
     # download links of chapters
-    # download_links()
+    download_links()
 
     # download content from pages to files
     download_pages()
